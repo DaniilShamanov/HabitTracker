@@ -12,6 +12,18 @@ class Periodicity(str, Enum):
 
     DAILY = "daily"
     WEEKLY = "weekly"
+    MONTHLY = "monthly"
+    YEARLY = "yearly"
+    CUSTOM = "custom"
+
+
+DEFAULT_INTERVAL_DAYS: dict[Periodicity, int] = {
+    Periodicity.DAILY: 1,
+    Periodicity.WEEKLY: 7,
+    Periodicity.MONTHLY: 30,
+    Periodicity.YEARLY: 365,
+    Periodicity.CUSTOM: 1,
+}
 
 
 @dataclass(frozen=True)
@@ -22,4 +34,6 @@ class Habit:
     name: str
     description: str
     periodicity: Periodicity
+    interval_days: int
+    target_per_period: int
     created_at: datetime

@@ -7,11 +7,14 @@ from datetime import datetime, timedelta
 from .models import Periodicity
 
 PREDEFINED_HABITS = [
-    ("Drink Water", "Drink at least 2 liters of water", Periodicity.DAILY),
-    ("Read", "Read at least 20 minutes", Periodicity.DAILY),
-    ("Meditate", "10-minute mindfulness session", Periodicity.DAILY),
-    ("Workout", "Complete a workout session", Periodicity.WEEKLY),
-    ("Plan Week", "Review and plan weekly goals", Periodicity.WEEKLY),
+    ("Drink Water", "Drink at least 2 liters of water", Periodicity.DAILY, 1, 1),
+    ("Read", "Read at least 20 minutes", Periodicity.DAILY, 1, 1),
+    ("Meditate", "10-minute mindfulness session", Periodicity.DAILY, 1, 1),
+    ("Workout", "Complete a workout session", Periodicity.WEEKLY, 7, 1),
+    ("Plan Week", "Review and plan weekly goals", Periodicity.WEEKLY, 7, 1),
+    ("Budget Review", "Check monthly spending and savings", Periodicity.MONTHLY, 30, 1),
+    ("Tax Prep", "Prepare annual tax documents", Periodicity.YEARLY, 365, 1),
+    ("Deep Clean", "Clean one room thoroughly", Periodicity.CUSTOM, 10, 1),
 ]
 
 
@@ -31,4 +34,7 @@ def four_week_fixture(start: datetime | None = None) -> dict[str, list[datetime]
         "Meditate": daily([0, 1, 3, 4, 7, 8, 9, 14, 15, 16, 22, 23, 24]),
         "Workout": weekly([0, 1, 2, 3]),
         "Plan Week": weekly([0, 2, 3]),
+        "Budget Review": [start_date - timedelta(days=15), start_date + timedelta(days=20)],
+        "Tax Prep": [start_date - timedelta(days=365), start_date],
+        "Deep Clean": [start_date + timedelta(days=d) for d in [0, 10, 20]],
     }
