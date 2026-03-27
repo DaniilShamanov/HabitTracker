@@ -12,45 +12,46 @@ HabitTracker provides:
 - analytics functions (implemented in a functional style in the analytics module),
 - and a command-line interface for CRUD + analysis operations.
 
----
 
 ## 2) Quick start
+
+### 2.0 Prerequisites
+
+Before installing or running HabitTracker, make sure you have:
+
+- **Python 3.8+** (project metadata requires `>=3.8`)
+- **pip** (for installing packages)
+- **setuptools 61+** (required by the build system)
+- **pytest** (required to run the automated test suite)
+
+Optional but recommended:
+
+- A virtual environment tool such as `venv`
 
 ### 2.1 Install
 
 From the project root:
 
-```bash
 pip install -e .
-```
 
 ### 2.2 Initialize a database
 
-```bash
 python -m habit_tracker.cli --db habits.db init-db
-```
 
 ### 2.3 Load predefined habits + 4-week fixture data
 
-```bash
 python -m habit_tracker.cli --db habits.db load-fixtures
-```
 
 ### 2.4 List habits
 
-```bash
 python -m habit_tracker.cli --db habits.db list
-```
 
----
 
 ## 3) Command reference (all available commands + parameters)
 
 Base command format:
 
-```bash
 python -m habit_tracker.cli [GLOBAL_OPTIONS] <COMMAND> [COMMAND_OPTIONS] [ARGS]
-```
 
 ### 3.1 Global options
 
@@ -58,50 +59,37 @@ python -m habit_tracker.cli [GLOBAL_OPTIONS] <COMMAND> [COMMAND_OPTIONS] [ARGS]
 |---|---|---:|---|---|
 | `--db` | string (path) | No | `habits.db` | SQLite database file path. |
 
----
 
 ### 3.2 Commands
 
 #### `init-db`
 Initializes required SQLite tables.
 
-```bash
 python -m habit_tracker.cli --db habits.db init-db
-```
 
 Parameters: none.
-
----
 
 #### `load-fixtures`
 Initializes DB (if needed), then loads predefined habits and completion fixture data.
 
-```bash
 python -m habit_tracker.cli --db habits.db load-fixtures
-```
 
 Parameters: none.
 
----
 
 #### `list`
 Lists all tracked habits with metadata.
 
-```bash
 python -m habit_tracker.cli --db habits.db list
-```
 
 Parameters: none.
 
----
 
 #### `create`
 Creates a habit.
 
-```bash
 python -m habit_tracker.cli --db habits.db create "Read" "Read 20 minutes" daily
 python -m habit_tracker.cli --db habits.db create "Deep Clean" "Every 10 days" custom --interval-days 10 --target 1
-```
 
 Positional arguments:
 
@@ -118,14 +106,11 @@ Options:
 | `--interval-days` | integer > 0 | No | periodicity default (`1/7/30/365/1`) | Number of days per period. Especially useful for `custom`. |
 | `--target` | integer > 0 | No | `1` | Required completions per period. |
 
----
 
 #### `delete`
 Deletes a habit by id.
 
-```bash
 python -m habit_tracker.cli --db habits.db delete 3
-```
 
 Positional arguments:
 
@@ -133,14 +118,11 @@ Positional arguments:
 |---|---|---:|---|
 | `habit_id` | integer | Yes | Habit ID to delete. |
 
----
 
 #### `checkoff`
 Adds a completion timestamp for a habit.
 
-```bash
 python -m habit_tracker.cli --db habits.db checkoff 2
-```
 
 Positional arguments:
 
@@ -148,14 +130,11 @@ Positional arguments:
 |---|---|---:|---|
 | `habit_id` | integer | Yes | Habit ID to mark completed now (UTC timestamp). |
 
----
 
 #### `streak`
 Returns the longest historical streak for one habit.
 
-```bash
 python -m habit_tracker.cli --db habits.db streak 2
-```
 
 Positional arguments:
 
@@ -163,14 +142,11 @@ Positional arguments:
 |---|---|---:|---|
 | `habit_id` | integer | Yes | Habit ID to analyze. |
 
----
 
 #### `current-streak`
 Returns the currently active streak for one habit.
 
-```bash
 python -m habit_tracker.cli --db habits.db current-streak 2
-```
 
 Positional arguments:
 
@@ -178,14 +154,11 @@ Positional arguments:
 |---|---|---:|---|
 | `habit_id` | integer | Yes | Habit ID to analyze. |
 
----
 
 #### `next-due`
 Estimates the next due datetime for one habit.
 
-```bash
 python -m habit_tracker.cli --db habits.db next-due 2
-```
 
 Positional arguments:
 
@@ -193,14 +166,11 @@ Positional arguments:
 |---|---|---:|---|
 | `habit_id` | integer | Yes | Habit ID to analyze. |
 
----
 
 #### `completion-rate`
 Returns trailing completion rate for one habit.
 
-```bash
 python -m habit_tracker.cli --db habits.db completion-rate 2 --periods 12
-```
 
 Positional arguments:
 
@@ -214,26 +184,20 @@ Options:
 |---|---|---:|---|---|
 | `--periods` | integer > 0 | No | `12` | Number of trailing periods used for the rate calculation. |
 
----
 
 #### `longest-streak`
 Returns the best streak among all habits.
 
-```bash
 python -m habit_tracker.cli --db habits.db longest-streak
-```
 
 Parameters: none.
 
----
 
 #### `by-period`
 Lists habits filtered by periodicity.
 
-```bash
 python -m habit_tracker.cli --db habits.db by-period daily
 python -m habit_tracker.cli --db habits.db by-period weekly
-```
 
 Positional arguments:
 
@@ -241,7 +205,6 @@ Positional arguments:
 |---|---|---:|---|---|
 | `periodicity` | enum | Yes | `daily`, `weekly`, `monthly`, `yearly`, `custom` | Filter criterion. |
 
----
 
 ## 4) Analytics semantics
 
@@ -251,7 +214,6 @@ Positional arguments:
 - **Completion rate:** completed periods / total periods in a trailing window.
 - **Next due date:** based on the most recent completion and interval (or creation date if no completions).
 
----
 
 ## 5) Compliance review against provided course requirements
 
@@ -295,15 +257,11 @@ For full portfolio submission compliance, keep these deliverables in sync with y
 
 Run tests from the project root:
 
-```bash
 pytest
-```
 
 Recommended additional CLI sanity checks:
 
-```bash
 python -m habit_tracker.cli --db habits.db init-db
 python -m habit_tracker.cli --db habits.db load-fixtures
 python -m habit_tracker.cli --db habits.db list
 python -m habit_tracker.cli --db habits.db longest-streak
-```

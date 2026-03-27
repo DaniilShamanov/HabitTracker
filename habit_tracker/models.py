@@ -17,15 +17,6 @@ class Periodicity(str, Enum):
     CUSTOM = "custom"
 
 
-DEFAULT_INTERVAL_DAYS: dict[Periodicity, int] = {
-    Periodicity.DAILY: 1,
-    Periodicity.WEEKLY: 7,
-    Periodicity.MONTHLY: 30,
-    Periodicity.YEARLY: 365,
-    Periodicity.CUSTOM: 1,
-}
-
-
 @dataclass(frozen=True)
 class Habit:
     """Represents a user-defined habit and its metadata."""
@@ -37,3 +28,12 @@ class Habit:
     interval_days: int
     target_per_period: int
     created_at: datetime
+
+
+DEFAULT_INTERVAL_DAYS = {
+        Periodicity.DAILY: 1,
+        Periodicity.WEEKLY: 7,
+        Periodicity.MONTHLY: 30,      # approximate
+        Periodicity.YEARLY: 365,      # approximate
+        Periodicity.CUSTOM: 1,        # fallback, but should be set explicitly
+    }

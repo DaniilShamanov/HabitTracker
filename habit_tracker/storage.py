@@ -7,15 +7,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Iterable
 
-from .models import Habit, Periodicity
-
-DEFAULT_INTERVAL_DAYS = {
-        Periodicity.DAILY: 1,
-        Periodicity.WEEKLY: 7,
-        Periodicity.MONTHLY: 30,      # approximate
-        Periodicity.YEARLY: 365,      # approximate
-        Periodicity.CUSTOM: 1,        # fallback, but should be set explicitly
-    }
+from .models import Habit, Periodicity, DEFAULT_INTERVAL_DAYS
 
 
 class HabitAlreadyExistsError(ValueError):
