@@ -1,102 +1,309 @@
 # HabitTracker User Guide
 
-## Overview
+## 1) Purpose and scope
 
-HabitTracker is a CLI-first habit tracking backend that combines:
+This guide documents how to install, run, and use the HabitTracker CLI backend. It also maps the implementation to the IU portfolio requirements so you can verify compliance quickly.
 
-- persistent SQLite storage,
-- flexible periodic scheduling,
-- streak analytics,
-- and reproducible fixture data for demos/tests.
+HabitTracker provides:
 
-## Periodicity system
+- object-oriented habit modeling (`Habit` class),
+- persistent storage with SQLite,
+- completion tracking with timestamps,
+- analytics functions (implemented in a functional style in the analytics module),
+- and a command-line interface for CRUD + analysis operations.
 
-HabitTracker supports five periodicity modes:
+---
 
-1. **daily**: one period per calendar day
-2. **weekly**: one period per ISO week
-3. **monthly**: one period per calendar month
-4. **yearly**: one period per calendar year
-5. **custom**: one period per `interval_days`
+## 2) Quick start
 
-### Interval behavior
+### 2.1 Install
 
-- Daily defaults to interval `1`
-- Weekly defaults to interval `7`
-- Monthly defaults to interval `30`
-- Yearly defaults to interval `365`
-- Custom defaults to `1`, but you typically set it explicitly
+From the project root:
 
-Example: `custom --interval-days 10` means every tenth day.
+```bash
+pip install -e .
+```
 
-## CLI workflow
-
-### Initialize database
+### 2.2 Initialize a database
 
 ```bash
 python -m habit_tracker.cli --db habits.db init-db
 ```
 
-### Seed example data
+### 2.3 Load predefined habits + 4-week fixture data
 
 ```bash
 python -m habit_tracker.cli --db habits.db load-fixtures
 ```
 
-### Create habits
+### 2.4 List habits
+
+```bash
+python -m habit_tracker.cli --db habits.db list
+```
+
+---
+
+## 3) Command reference (all available commands + parameters)
+
+Base command format:
+
+```bash
+python -m habit_tracker.cli [GLOBAL_OPTIONS] <COMMAND> [COMMAND_OPTIONS] [ARGS]
+```
+
+### 3.1 Global options
+
+| Option | Type | Required | Default | Description |
+|---|---|---:|---|---|
+| `--db` | string (path) | No | `habits.db` | SQLite database file path. |
+
+---
+
+### 3.2 Commands
+
+#### `init-db`
+Initializes required SQLite tables.
+
+```bash
+python -m habit_tracker.cli --db habits.db init-db
+```
+
+Parameters: none.
+
+---
+
+#### `load-fixtures`
+Initializes DB (if needed), then loads predefined habits and completion fixture data.
+
+```bash
+python -m habit_tracker.cli --db habits.db load-fixtures
+```
+
+Parameters: none.
+
+---
+
+#### `list`
+Lists all tracked habits with metadata.
+
+```bash
+python -m habit_tracker.cli --db habits.db list
+```
+
+Parameters: none.
+
+---
+
+#### `create`
+Creates a habit.
 
 ```bash
 python -m habit_tracker.cli --db habits.db create "Read" "Read 20 minutes" daily
-python -m habit_tracker.cli --db habits.db create "Workout" "2 sessions/week" weekly
-python -m habit_tracker.cli --db habits.db create "Budget" "Monthly budget review" monthly
-python -m habit_tracker.cli --db habits.db create "Taxes" "Annual tax prep" yearly
-python -m habit_tracker.cli --db habits.db create "Deep Clean" "Every 10 days" custom --interval-days 10
+python -m habit_tracker.cli --db habits.db create "Deep Clean" "Every 10 days" custom --interval-days 10 --target 1
 ```
 
-### Check off a completion
+Positional arguments:
+
+| Arg | Type | Required | Allowed values | Description |
+|---|---|---:|---|---|
+| `name` | string | Yes | any non-empty string | Habit name (must be unique). |
+| `description` | string | Yes | any non-empty string | Habit description/task specification. |
+| `periodicity` | enum | Yes | `daily`, `weekly`, `monthly`, `yearly`, `custom` | Habit period type. |
+
+Options:
+
+| Option | Type | Required | Default | Description |
+|---|---|---:|---|---|
+| `--interval-days` | integer > 0 | No | periodicity default (`1/7/30/365/1`) | Number of days per period. Especially useful for `custom`. |
+| `--target` | integer > 0 | No | `1` | Required completions per period. |
+
+---
+
+#### `delete`
+Deletes a habit by id.
 
 ```bash
-python -m habit_tracker.cli --db habits.db checkoff 1
+python -m habit_tracker.cli --db habits.db delete 3
 ```
 
-### Analytics
+Positional arguments:
+
+| Arg | Type | Required | Description |
+|---|---|---:|---|
+| `habit_id` | integer | Yes | Habit ID to delete. |
+
+---
+
+#### `checkoff`
+Adds a completion timestamp for a habit.
 
 ```bash
-python -m habit_tracker.cli --db habits.db streak 1
-python -m habit_tracker.cli --db habits.db current-streak 1
-python -m habit_tracker.cli --db habits.db completion-rate 1 --periods 12
-python -m habit_tracker.cli --db habits.db next-due 1
+python -m habit_tracker.cli --db habits.db checkoff 2
+```
+
+Positional arguments:
+
+| Arg | Type | Required | Description |
+|---|---|---:|---|
+| `habit_id` | integer | Yes | Habit ID to mark completed now (UTC timestamp). |
+
+---
+
+#### `streak`
+Returns the longest historical streak for one habit.
+
+```bash
+python -m habit_tracker.cli --db habits.db streak 2
+```
+
+Positional arguments:
+
+| Arg | Type | Required | Description |
+|---|---|---:|---|
+| `habit_id` | integer | Yes | Habit ID to analyze. |
+
+---
+
+#### `current-streak`
+Returns the currently active streak for one habit.
+
+```bash
+python -m habit_tracker.cli --db habits.db current-streak 2
+```
+
+Positional arguments:
+
+| Arg | Type | Required | Description |
+|---|---|---:|---|
+| `habit_id` | integer | Yes | Habit ID to analyze. |
+
+---
+
+#### `next-due`
+Estimates the next due datetime for one habit.
+
+```bash
+python -m habit_tracker.cli --db habits.db next-due 2
+```
+
+Positional arguments:
+
+| Arg | Type | Required | Description |
+|---|---|---:|---|
+| `habit_id` | integer | Yes | Habit ID to analyze. |
+
+---
+
+#### `completion-rate`
+Returns trailing completion rate for one habit.
+
+```bash
+python -m habit_tracker.cli --db habits.db completion-rate 2 --periods 12
+```
+
+Positional arguments:
+
+| Arg | Type | Required | Description |
+|---|---|---:|---|
+| `habit_id` | integer | Yes | Habit ID to analyze. |
+
+Options:
+
+| Option | Type | Required | Default | Description |
+|---|---|---:|---|---|
+| `--periods` | integer > 0 | No | `12` | Number of trailing periods used for the rate calculation. |
+
+---
+
+#### `longest-streak`
+Returns the best streak among all habits.
+
+```bash
 python -m habit_tracker.cli --db habits.db longest-streak
 ```
 
-## Analytics semantics
+Parameters: none.
 
-- **Longest streak**: max consecutive completed periods in history.
-- **Current streak**: consecutive completed periods ending at latest completed period.
-- **Completion rate**: ratio of completed periods in trailing `N` periods.
-- **Next due date**: latest completion plus interval (or creation date if none completed).
+---
 
-## Database notes
+#### `by-period`
+Lists habits filtered by periodicity.
 
-Schema includes migration-safe column bootstrapping for:
+```bash
+python -m habit_tracker.cli --db habits.db by-period daily
+python -m habit_tracker.cli --db habits.db by-period weekly
+```
 
-- `interval_days`
-- `target_per_period`
+Positional arguments:
 
-This lets older local DB files be upgraded without dropping data.
+| Arg | Type | Required | Allowed values | Description |
+|---|---|---:|---|---|
+| `periodicity` | enum | Yes | `daily`, `weekly`, `monthly`, `yearly`, `custom` | Filter criterion. |
 
-## Testing
+---
 
-Run:
+## 4) Analytics semantics
+
+- **Longest streak (per habit):** max consecutive completed periods in that habit’s history.
+- **Current streak:** consecutive completed periods ending at the latest completed period.
+- **Longest streak (global):** best streak among all habits.
+- **Completion rate:** completed periods / total periods in a trailing window.
+- **Next due date:** based on the most recent completion and interval (or creation date if no completions).
+
+---
+
+## 5) Compliance review against provided course requirements
+
+### 5.1 Functional requirements coverage
+
+- Habit concept is modeled as a class (`Habit`).
+- Multiple habits are supported.
+- Habits support daily and weekly periodicities (plus monthly/yearly/custom extensions).
+- Completions are tracked with timestamps.
+- Persistence is handled with SQLite.
+- CLI supports creating, deleting, listing, and analytics operations.
+- Analytics required by assignment are supported:
+  - list all habits,
+  - list habits by periodicity,
+  - longest streak across all habits,
+  - longest streak for a specific habit.
+- Predefined habits and fixture history are available through `load-fixtures`.
+
+### 5.2 Documentation/process requirements
+
+For full portfolio submission compliance, keep these deliverables in sync with your current code:
+
+1. **Conception phase PDF** (1–3 pages, includes at least one diagram).
+2. **Development/reflection PDF slides** (about 5–10 slides).
+3. **Finalization package**:
+   - public GitHub repo link,
+   - ZIP containing all required phase outputs + source files,
+   - 1–2 page abstract PDF including GitHub link,
+   - naming conventions exactly as requested by IU.
+
+### 5.3 Important check before submission
+
+- Ensure your final repository content and ZIP content are identical.
+- Ensure all three phase artifacts are included in the final submission.
+- Ensure README + this guide are consistent with actual CLI behavior.
+- Run the full unit-test suite before packaging.
+
+---
+
+## 6) Testing
+
+Run tests from the project root:
 
 ```bash
 pytest
 ```
 
-The suite validates:
+Recommended additional CLI sanity checks:
 
-- CRUD basics,
-- periodicity filtering,
-- streak computations,
-- monthly/yearly/custom behavior,
-- due date and completion-rate helpers.
+```bash
+python -m habit_tracker.cli --db habits.db init-db
+python -m habit_tracker.cli --db habits.db load-fixtures
+python -m habit_tracker.cli --db habits.db list
+python -m habit_tracker.cli --db habits.db longest-streak
+```

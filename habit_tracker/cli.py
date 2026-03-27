@@ -75,7 +75,13 @@ def main() -> None:
             )
     elif args.command == "create":
         try:
-            habit = repo.create_habit(args.name, args.description, Periodicity(args.periodicity))
+            habit = repo.create_habit(
+                args.name,
+                args.description,
+                Periodicity(args.periodicity),
+                interval_days=args.interval_days,
+                target_per_period=args.target,
+            )
             print(f"Created habit {habit.id}: {habit.name}")
         except HabitAlreadyExistsError as exc:
             raise SystemExit(str(exc))
